@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"unicode/utf8"
+	"fmt"
 )
 
 var ErrInvalidUTF8 = errors.New("invalid utf8")
@@ -13,4 +14,8 @@ func GetUTFLength(input []byte) (int, error) {
 	}
 
 	return utf8.RuneCount(input), nil
+}
+
+func main() {
+	fmt.Println(GetUTFLength([]byte{1}))
 }
