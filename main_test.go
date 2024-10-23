@@ -1,25 +1,71 @@
-package main
+package calculator
 
-import "testing"
+import (
+	"testing"
+)
 
-type Test struct{
-    in []byte
-    ans int
-    err error
-}
+func TestCalc(t *testing.T) {
+	testCasesSuccess := []struct {
+		name           string
+		expression     string
+		expectedResult float64
+	}{
+		{
+			name:           "simple",
+			expression:     "1+1",
+			expectedResult: 2,
+		},
+		{
+			name:           "priority",
+			expression:     "(2+2)*2",
+			expectedResult: 8,
+		},
+		{
+			name:           "priority",
+			expression:     "2+2*2",
+			expectedResult: 6,
+		},
+		{
+			name:           "/",
+			expression:     "1/2",
+			expectedResult: 0.5,
+		},
+	}
 
-var tests = []Test{
-    {[]byte{1, 12, 27}, 3, nil},
-    {[]byte{255}, 0, ErrInvalidUTF8},
-    {[]byte{127, 125, 11}, 3, nil},
-    {[]byte{0}, 1, nil},
-}
+	for _, testCase := range testCasesSuccess {
+		t.Run(testCase.name, func(t *testing.T) {
+			val, err := Calc(testCase.expression)
+			if err != nil {
+				t.Fatalf("successful case %s returns error", testCase.expression)
+			}
+			if val != testCase.expectedResult {
+				t.Fatalf("%f should be equal %f", val, testCase.expectedResult)
+			}
+		})
+	}
 
-func TestGetUTFLength(t *testing.T) {
-    for i, test := range tests {
-        got, err := GetUTFLength(test.in)
-        if got != test.ans || err != test.err {
-            t.Errorf("#%d: Ответ не совпал", i)
-        }
-    }
+	testCasesFail := []struct {
+		name        string
+		expression  string
+		expectedErr error
+	}{
+		{
+			name:       "simple",
+			expression: "1+1*",
+		},
+
+		{
+			name:        "empty string",
+			expression:  "",
+		},
+	}
+
+	for _, testCase := range testCasesFail {
+		t.Run(testCase.name, func(t *testing.T) {
+			_, err := Calc(testCase.expression)
+			if err == nil {
+				t.Fatalf("тест должен был вернуть ошибку")
+			}
+		})
+	}
 }
